@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { signIn, signUp, isFirebaseConfigured } from "../../services/api";
-import { Lock, LogIn, UserPlus, Zap, AlertTriangle, ShieldCheck, Sparkles } from "lucide-react";
+import { Lock, LogIn, UserPlus, Zap, AlertTriangle, ShieldCheck, Sparkles, Eye, EyeOff } from "lucide-react";
+import { playClickSound } from "../../utils/audio";
 
 function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -119,10 +121,14 @@ function Auth() {
               
               {/* Email Input */}
               <div className="space-y-1.5 text-left">
-                <label className="block font-black text-xs uppercase tracking-wider text-black">
+                <label 
+                  htmlFor="auth-email"
+                  className="block font-black text-xs uppercase tracking-wider text-black"
+                >
                   EMAIL ADDRESS:
                 </label>
                 <input
+                  id="auth-email"
                   type="email"
                   placeholder="name@example.com"
                   value={email}
@@ -134,17 +140,40 @@ function Auth() {
 
               {/* Password Input */}
               <div className="space-y-1.5 text-left">
-                <label className="block font-black text-xs uppercase tracking-wider text-black">
+                <label 
+                  htmlFor="auth-password"
+                  className="block font-black text-xs uppercase tracking-wider text-black"
+                >
                   PASSWORD:
                 </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-neo"
-                  required
-                />
+                <div className="relative flex items-center">
+                  <input
+                    id="auth-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-neo pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    id="toggle-password-visibility"
+                    onClick={() => {
+                      playClickSound();
+                      setShowPassword((prev) => !prev);
+                    }}
+                    className="absolute right-3 p-1.5 bg-white text-black hover:bg-[#FF6B6B] hover:text-white border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center"
+                    title={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 stroke-[2.5px]" />
+                    ) : (
+                      <Eye className="h-4 w-4 stroke-[2.5px]" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Buttons */}
