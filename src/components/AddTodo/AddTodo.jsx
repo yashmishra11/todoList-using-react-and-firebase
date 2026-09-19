@@ -44,7 +44,7 @@ function AddTodo({ user }) {
   ];
 
   return (
-    <div className="mb-10">
+    <div className="mb-6">
       {/* Container Card */}
       <div className="bg-white border-4 border-black p-4 sm:p-5 shadow-[8px_8px_0px_0px_#000] relative">
         

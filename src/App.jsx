@@ -11,7 +11,7 @@ import { useEffect, useReducer, useState, useRef } from 'react';
 import { onAuthChange, signOutUser, isFirebaseConfigured } from './services/api';
 import Auth from './components/Auth/Auth';
 import FocusTimer from './components/Timer/FocusTimer';
-import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX, ArrowUp, Timer as TimerIcon } from 'lucide-react';
+import { CheckSquare, LogOut, Zap, Volume2, VolumeX, ArrowUp, Timer as TimerIcon } from 'lucide-react';
 import { isSoundEnabled, setSoundEnabled, playClickSound } from './utils/audio';
 import Lenis from 'lenis';
 
@@ -178,30 +178,7 @@ function App() {
         </header>
 
         {/* Main Application Container */}
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-28">
-          
-          {/* Hero Header Section */}
-          <div className="text-center mb-10 relative">
-            
-            {/* Top decorative floating sticker */}
-            <div className="inline-flex items-center gap-1.5 bg-[#FF6B6B] text-white border-4 border-black px-3.5 py-1 font-black text-xs uppercase tracking-widest shadow-[4px_4px_0px_#000] -rotate-3 mb-3">
-              <Star className="h-3.5 w-3.5 fill-white stroke-[2px]" />
-              <span>PUNK PRODUCTIVITY</span>
-            </div>
-
-            {/* Main Headline with Outline & Contrast */}
-            <h1 className="font-black text-5xl sm:text-7xl uppercase tracking-tighter leading-none text-black drop-shadow-[4px_4px_0px_#FFD93D]">
-              TODO APP
-            </h1>
-
-            <p className="mt-2 text-sm sm:text-base font-bold uppercase tracking-wider text-black/70">
-              NO SUBTLE GRADIENTS. NO BLUR. JUST HARD WORK.
-            </p>
-
-            {/* Thick Divider */}
-            <div className="mt-6 mx-auto w-32 h-2.5 bg-black border-2 border-black shadow-[4px_4px_0px_#FF6B6B]" />
-          </div>
-
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6 pb-20">
           {/* Add Todo Component */}
           <AddTodo user={user} />
 
