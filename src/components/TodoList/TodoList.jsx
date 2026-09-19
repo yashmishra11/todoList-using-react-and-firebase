@@ -20,7 +20,8 @@ import {
   X, 
   Trash2, 
   CheckCheck,
-  Trophy
+  Trophy,
+  Tag as TagIcon
 } from "lucide-react";
 import { playClickSound, playDeleteSound, playSuccessSound } from "../../utils/audio";
 import { triggerNeoConfetti } from "../../utils/confetti";
@@ -29,6 +30,7 @@ function TodoList({ user }) {
   const [todos, setTodos] = useState([]);
   const [sortBy, setSortBy] = useState('priority'); // 'priority' | 'dueDate' | 'newest'
   const [filterPriority, setFilterPriority] = useState('all'); // 'all' | 1 | 2 | 3
+  const [filterTag, setFilterTag] = useState('all'); // 'all' | 'WORK' | 'DEV' | ...
   const [searchQuery, setSearchQuery] = useState('');
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -70,11 +72,12 @@ function TodoList({ user }) {
     await updateTodoStatus(id, isFinished);
   };
 
-  const onEdit = async (id, newText, newPriority, newDueDate) => {
+  const onEdit = async (id, newText, newPriority, newDueDate, newTag) => {
     await updateTodo(id, {
       text: newText,
       priority: Number(newPriority) || 2,
-      dueDate: newDueDate || null
+      dueDate: newDueDate || null,
+      tag: newTag || null
     });
   };
 
@@ -121,16 +124,20 @@ function TodoList({ user }) {
   const p2Count = todos.filter(t => !t.finished && (Number(t.priority) === 2 || !t.priority)).length;
   const p3Count = todos.filter(t => !t.finished && Number(t.priority) === 3).length;
 
-  // Filter by priority and search query
+  // Filter by priority, tag, and search query
   const filteredTodos = todos.filter((todo) => {
     if (filterPriority !== 'all' && Number(todo.priority || 2) !== Number(filterPriority)) {
+      return false;
+    }
+    if (filterTag !== 'all' && (todo.tag || '').toUpperCase() !== filterTag.toUpperCase()) {
       return false;
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       const matchText = (todo.text || '').toLowerCase().includes(q);
       const matchDate = (todo.dueDate || '').toLowerCase().includes(q);
-      if (!matchText && !matchDate) return false;
+      const matchTag = (todo.tag || '').toLowerCase().includes(q);
+      if (!matchText && !matchDate && !matchTag) return false;
     }
     return true;
   });
@@ -378,6 +385,35 @@ function TodoList({ user }) {
             </button>
           </div>
 
+          {/* Category Filter Badges */}
+          <div className="flex items-center gap-2 flex-wrap px-1 pt-1 border-t-2 border-dashed border-black/20">
+            <span className="text-[11px] font-black uppercase tracking-wider text-black flex items-center gap-1">
+              <TagIcon className="h-3 w-3 stroke-[2.5px]" />
+              CATEGORY:
+            </span>
+
+            {['all', 'WORK', 'DEV', 'PERSONAL', 'STUDY', 'HEALTH', 'LIFE'].map((cat) => {
+              const isSelected = filterTag === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setFilterTag(cat);
+                  }}
+                  className={`border-2 border-black px-2 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
+                    isSelected
+                      ? "bg-black text-white shadow-[2px_2px_0px_#FFD93D]"
+                      : "bg-white text-black hover:bg-black/10"
+                  }`}
+                >
+                  {cat === 'all' ? 'ALL TAGS' : `#${cat}`}
+                </button>
+              );
+            })}
+          </div>
+
         </div>
       )}
 
@@ -422,9 +458,10 @@ function TodoList({ user }) {
             isFinished={todo.finished}
             priority={todo.priority || 2}
             dueDate={todo.dueDate || null}
+            tag={todo.tag || null}
             changeFinished={(isFinished) => onFinished(todo.id, isFinished)}
             onDelete={() => onDelete(todo.id)}
-            onEdit={(todoText, newPriority, newDueDate) => onEdit(todo.id, todoText, newPriority, newDueDate)}
+            onEdit={(todoText, newPriority, newDueDate, newTag) => onEdit(todo.id, todoText, newPriority, newDueDate, newTag)}
           />
         ))
       )}

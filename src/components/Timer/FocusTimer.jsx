@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Play, 
   Pause, 
@@ -14,7 +14,7 @@ import {
   Coffee,
   Sparkles
 } from "lucide-react";
-import { playClickSound, playSuccessSound, playTimerAlarmSound } from "../../utils/audio";
+import { playClickSound, playTimerAlarmSound } from "../../utils/audio";
 import { triggerNeoConfetti } from "../../utils/confetti";
 
 function FocusTimer({ isOpen, onClose }) {
@@ -55,6 +55,28 @@ function FocusTimer({ isOpen, onClose }) {
     return () => clearInterval(timerRef.current);
   }, [isRunning, remainingSeconds]);
 
+  const resetTimer = useCallback(() => {
+    playClickSound();
+    setIsRunning(false);
+    setIsFinished(false);
+    setRemainingSeconds(totalSeconds);
+  }, [totalSeconds]);
+
+  const toggleTimer = useCallback(() => {
+    playClickSound();
+    if (remainingSeconds === 0) {
+      resetTimer();
+      return;
+    }
+    setIsRunning((prev) => !prev);
+    setIsFinished(false);
+  }, [remainingSeconds, resetTimer]);
+
+  const toggleFullscreen = useCallback(() => {
+    playClickSound();
+    setIsFullscreen((prev) => !prev);
+  }, []);
+
   // Keyboard shortcut handler (Space = Play/Pause, F = Fullscreen, Esc = Exit/Close)
   useEffect(() => {
     if (!isOpen) return;
@@ -81,31 +103,9 @@ function FocusTimer({ isOpen, onClose }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isRunning, isFullscreen, remainingSeconds]);
+  }, [isOpen, isFullscreen, onClose, toggleTimer, toggleFullscreen]);
 
   if (!isOpen) return null;
-
-  const toggleTimer = () => {
-    playClickSound();
-    if (remainingSeconds === 0) {
-      resetTimer();
-      return;
-    }
-    setIsRunning((prev) => !prev);
-    setIsFinished(false);
-  };
-
-  const resetTimer = () => {
-    playClickSound();
-    setIsRunning(false);
-    setIsFinished(false);
-    setRemainingSeconds(totalSeconds);
-  };
-
-  const toggleFullscreen = () => {
-    playClickSound();
-    setIsFullscreen((prev) => !prev);
-  };
 
   const applyCustomDuration = (h, m, s) => {
     const validH = Math.min(99, Math.max(0, parseInt(h, 10) || 0));

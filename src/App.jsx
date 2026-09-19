@@ -10,7 +10,8 @@ import todoReducer from './reducers/todoReducer';
 import { useEffect, useReducer, useState, useRef } from 'react';
 import { onAuthChange, signOutUser, isFirebaseConfigured } from './services/api';
 import Auth from './components/Auth/Auth';
-import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX, ArrowUp } from 'lucide-react';
+import FocusTimer from './components/Timer/FocusTimer';
+import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX, ArrowUp, Timer as TimerIcon } from 'lucide-react';
 import { isSoundEnabled, setSoundEnabled, playClickSound } from './utils/audio';
 import Lenis from 'lenis';
 
@@ -20,6 +21,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isTimerOpen, setIsTimerOpen] = useState(false);
   const lenisRef = useRef(null);
 
   // Buttery smooth momentum scrolling via Lenis
@@ -123,6 +125,20 @@ function App() {
                 </div>
               )}
 
+              {/* Focus Timer Trigger Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setIsTimerOpen(true);
+                }}
+                className="btn-neo bg-[#FFD93D] text-black border-2 border-black px-2.5 sm:px-3 py-1 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] flex items-center gap-1.5 -rotate-1"
+                title="Open Focus Timer (1s - 99h)"
+              >
+                <TimerIcon className="h-3.5 w-3.5 stroke-[2.5px]" />
+                <span>TIMER</span>
+              </button>
+
               <button
                 type="button"
                 onClick={toggleSound}
@@ -206,6 +222,9 @@ function App() {
             <ArrowUp className="h-6 w-6 stroke-[3.5px]" />
           </button>
         )}
+
+        {/* Focus Timer Modal / Fullscreen Overlay */}
+        <FocusTimer isOpen={isTimerOpen} onClose={() => setIsTimerOpen(false)} />
       </TodoDispatchContext.Provider>
     </TodoContext.Provider>
   );

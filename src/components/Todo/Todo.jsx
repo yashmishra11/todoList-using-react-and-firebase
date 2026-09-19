@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { Check, Edit2, Save, Trash2, Flame, Zap, Coffee, Calendar, Clock, X } from "lucide-react";
+import { Check, Edit2, Save, Trash2, Flame, Zap, Coffee, Calendar, Clock, X, Tag as TagIcon } from "lucide-react";
 import { playClickSound, playSuccessSound, playDeleteSound } from "../../utils/audio";
 import { triggerNeoConfetti } from "../../utils/confetti";
 
-function Todo({ todoData, isFinished, priority = 2, dueDate = null, changeFinished, onDelete, onEdit }) {
+function Todo({ todoData, isFinished, priority = 2, dueDate = null, tag = null, changeFinished, onDelete, onEdit }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(todoData);
   const [editedPriority, setEditedPriority] = useState(priority);
   const [editedDueDate, setEditedDueDate] = useState(dueDate || '');
+  const [editedTag, setEditedTag] = useState(tag || '');
 
   const todayStr = new Date().toISOString().split('T')[0];
   const isOverdue = !isFinished && Boolean(dueDate) && dueDate < todayStr;
@@ -36,13 +37,14 @@ function Todo({ todoData, isFinished, priority = 2, dueDate = null, changeFinish
     if (isEditing) {
       playClickSound();
       const textToSave = editedText.trim() ? editedText.trim() : todoData;
-      onEdit(textToSave, editedPriority, editedDueDate || null);
+      onEdit(textToSave, editedPriority, editedDueDate || null, editedTag || null);
       setIsEditing(false);
     } else {
       playClickSound();
       setEditedText(todoData);
       setEditedPriority(priority);
       setEditedDueDate(dueDate || '');
+      setEditedTag(tag || '');
       setIsEditing(true);
     }
   };
@@ -55,6 +57,7 @@ function Todo({ todoData, isFinished, priority = 2, dueDate = null, changeFinish
       setEditedText(todoData);
       setEditedPriority(priority);
       setEditedDueDate(dueDate || '');
+      setEditedTag(tag || '');
       setIsEditing(false);
     }
   };
@@ -142,6 +145,17 @@ function Todo({ todoData, isFinished, priority = 2, dueDate = null, changeFinish
           </span>
         )}
 
+        {/* Category Tag Badge (Non-edit mode) */}
+        {!isEditing && tag && (
+          <span
+            className="border-2 border-black bg-white px-2 py-1 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] flex items-center gap-1 shrink-0"
+            title={`Category: ${tag}`}
+          >
+            <TagIcon className="h-3 w-3 stroke-[2.5px]" />
+            <span>#{tag}</span>
+          </span>
+        )}
+
         {/* Task Text / Inline Edit */}
         <div className="flex-1 min-w-[200px]">
           {isEditing ? (
@@ -207,6 +221,29 @@ function Todo({ todoData, isFinished, priority = 2, dueDate = null, changeFinish
                   )}
                 </div>
 
+              </div>
+
+              {/* Tag selector in edit mode */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                <span className="text-xs font-black uppercase tracking-wider text-black flex items-center gap-1">
+                  <TagIcon className="h-3 w-3 stroke-[2.5px]" />
+                  CATEGORY:
+                </span>
+                {['WORK', 'DEV', 'PERSONAL', 'STUDY', 'HEALTH', 'LIFE'].map((tagName) => (
+                  <button
+                    key={tagName}
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      setEditedTag(editedTag === tagName ? '' : tagName);
+                    }}
+                    className={`border-2 border-black px-2 py-0.5 text-xs font-black uppercase ${
+                      editedTag === tagName ? "bg-black text-white" : "bg-white text-black"
+                    }`}
+                  >
+                    #{tagName}
+                  </button>
+                ))}
               </div>
             </div>
           ) : (

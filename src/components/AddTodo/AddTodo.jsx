@@ -183,6 +183,9 @@ function AddTodo({ user }) {
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+
           {/* Category / Tag Controls */}
           <div className="flex items-center gap-2 flex-wrap pt-1 border-t-2 border-dashed border-black/20">
             <span className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1">
