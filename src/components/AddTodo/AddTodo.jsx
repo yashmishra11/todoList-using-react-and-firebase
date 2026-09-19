@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createTodo } from "../../services/api";
-import { Plus, Sparkles, Flame, Zap, Coffee, Calendar, X, Tag as TagIcon } from 'lucide-react';
+import { Plus, Sparkles, Flame, Zap, Coffee, Calendar, X, Tag as TagIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { playClickSound } from '../../utils/audio';
 
 function AddTodo({ user }) {
@@ -9,9 +9,15 @@ function AddTodo({ user }) {
   const [dueDate, setDueDate] = useState('');
   const [tag, setTag] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState(false);
+  const [isManuallyCollapsed, setIsManuallyCollapsed] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+  const hasText = inputText.trim().length > 0;
+  const hasActiveSelections = Boolean(dueDate) || Boolean(tag);
+  const shouldShowOptions = (isManuallyExpanded || hasText || hasActiveSelections) && !isManuallyCollapsed;
 
   const handleAdd = async () => {
     const trimmed = inputText.trim();
@@ -23,6 +29,8 @@ function AddTodo({ user }) {
       setInputText('');
       setDueDate('');
       setTag('');
+      setIsManuallyExpanded(false);
+      setIsManuallyCollapsed(false);
       playClickSound();
     } catch (err) {
       console.error("Failed to add todo:", err);
@@ -63,7 +71,10 @@ function AddTodo({ user }) {
               type="text"
               placeholder="ENTER A NEW TASK HERE..."
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={(e) => {
+                setInputText(e.target.value);
+                if (isManuallyCollapsed) setIsManuallyCollapsed(false);
+              }}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -78,146 +89,181 @@ function AddTodo({ user }) {
           </button>
         </div>
 
-        {/* Priority & Due Date Selectors */}
-        <div className="mt-4 pt-3 border-t-2 border-dashed border-black/20 space-y-3">
-          
-          {/* Priority Controls */}
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-black text-xs uppercase tracking-wider text-black">
-                PRIORITY:
+        {/* Collapsible Priority, Deadline & Category Selectors */}
+        {shouldShowOptions ? (
+          <div className="mt-4 pt-3 border-t-2 border-dashed border-black/20 space-y-3">
+            
+            {/* Priority Controls */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-black text-xs uppercase tracking-wider text-black">
+                  PRIORITY:
+                </span>
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  {priorityOptions.map((opt) => {
+                    const Icon = opt.icon;
+                    const isSelected = priority === opt.level;
+                    return (
+                      <button
+                        key={opt.level}
+                        type="button"
+                        onClick={() => {
+                          playClickSound();
+                          setPriority(opt.level);
+                        }}
+                        className={`btn-neo border-3 border-black px-2.5 sm:px-3 py-1 text-xs font-black uppercase tracking-wider transition-all ${
+                          opt.bg
+                        } ${opt.text} ${
+                          isSelected
+                            ? "shadow-[3px_3px_0px_#000] ring-2 ring-black -translate-y-0.5"
+                            : "opacity-60 shadow-none hover:opacity-100"
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5 stroke-[2.5px]" />
+                        <span>{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-black/60 uppercase tracking-wider hidden md:inline-block">
+                  PRESS <strong>ENTER ↵</strong> TO SUBMIT
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setIsManuallyCollapsed(true);
+                    setIsManuallyExpanded(false);
+                  }}
+                  className="text-[11px] font-black uppercase tracking-wider text-black/50 hover:text-black flex items-center gap-1 cursor-pointer"
+                  title="Collapse extra options"
+                >
+                  <ChevronUp className="h-3.5 w-3.5 stroke-[3px]" />
+                  <span>HIDE</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Due Date Controls */}
+            <div className="flex items-center gap-2 flex-wrap pt-1">
+              <span className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5 stroke-[2.5px]" />
+                DEADLINE:
               </span>
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                {priorityOptions.map((opt) => {
-                  const Icon = opt.icon;
-                  const isSelected = priority === opt.level;
-                  return (
+
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setDueDate(dueDate === todayStr ? '' : todayStr);
+                  }}
+                  className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
+                    dueDate === todayStr
+                      ? "bg-[#FFD93D] text-black shadow-[2px_2px_0px_#000] ring-2 ring-black"
+                      : "bg-white text-black hover:bg-black/5"
+                  }`}
+                >
+                  TODAY
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound();
+                    setDueDate(dueDate === tomorrowStr ? '' : tomorrowStr);
+                  }}
+                  className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
+                    dueDate === tomorrowStr
+                      ? "bg-[#C4B5FD] text-black shadow-[2px_2px_0px_#000] ring-2 ring-black"
+                      : "bg-white text-black hover:bg-black/5"
+                  }`}
+                >
+                  TOMORROW
+                </button>
+
+                {/* Custom Date Input */}
+                <div className="inline-flex items-center border-2 border-black bg-white px-2 py-0.5 shadow-[2px_2px_0px_#000]">
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => {
+                      playClickSound();
+                      setDueDate(e.target.value);
+                    }}
+                    className="text-xs font-black uppercase outline-none bg-transparent cursor-pointer"
+                  />
+                  {dueDate && (
                     <button
-                      key={opt.level}
                       type="button"
                       onClick={() => {
                         playClickSound();
-                        setPriority(opt.level);
+                        setDueDate('');
                       }}
-                      className={`btn-neo border-3 border-black px-2.5 sm:px-3 py-1 text-xs font-black uppercase tracking-wider transition-all ${
-                        opt.bg
-                      } ${opt.text} ${
+                      className="ml-1 text-black hover:text-[#FF6B6B]"
+                      title="Clear date"
+                    >
+                      <X className="h-3 w-3 stroke-[3px]" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Category / Tag Controls */}
+            <div className="flex items-center gap-2 flex-wrap pt-1 border-t-2 border-dashed border-black/20">
+              <span className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1">
+                <TagIcon className="h-3.5 w-3.5 stroke-[2.5px]" />
+                CATEGORY:
+              </span>
+
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {['WORK', 'DEV', 'PERSONAL', 'STUDY', 'HEALTH', 'LIFE'].map((tagName) => {
+                  const isSelected = tag === tagName;
+                  return (
+                    <button
+                      key={tagName}
+                      type="button"
+                      onClick={() => {
+                        playClickSound();
+                        setTag(isSelected ? '' : tagName);
+                      }}
+                      className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
                         isSelected
-                          ? "shadow-[3px_3px_0px_#000] ring-2 ring-black -translate-y-0.5"
-                          : "opacity-60 shadow-none hover:opacity-100"
+                          ? "bg-black text-white shadow-[2px_2px_0px_#FFD93D] ring-2 ring-black"
+                          : "bg-white text-black hover:bg-black/5"
                       }`}
                     >
-                      <Icon className="h-3.5 w-3.5 stroke-[2.5px]" />
-                      <span>{opt.label}</span>
+                      #{tagName}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <span className="text-xs font-bold text-black/60 uppercase tracking-wider hidden md:inline-block">
-              PRESS <strong>ENTER ↵</strong> TO SUBMIT
+          </div>
+        ) : (
+          <div className="mt-2.5 pt-2 border-t-2 border-dashed border-black/10 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setIsManuallyExpanded(true);
+                setIsManuallyCollapsed(false);
+              }}
+              className="text-xs font-black uppercase tracking-wider text-black/50 hover:text-black flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <ChevronDown className="h-3.5 w-3.5 stroke-[3px]" />
+              <span>+ SET PRIORITY, DEADLINE & CATEGORY</span>
+            </button>
+            <span className="text-[11px] font-bold text-black/40 uppercase tracking-wider hidden sm:inline">
+              EXPANDS AUTOMATICALLY WHEN TYPING
             </span>
           </div>
-
-          {/* Due Date Controls */}
-          <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 stroke-[2.5px]" />
-              DEADLINE:
-            </span>
-
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  playClickSound();
-                  setDueDate(dueDate === todayStr ? '' : todayStr);
-                }}
-                className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
-                  dueDate === todayStr
-                    ? "bg-[#FFD93D] text-black shadow-[2px_2px_0px_#000] ring-2 ring-black"
-                    : "bg-white text-black hover:bg-black/5"
-                }`}
-              >
-                TODAY
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  playClickSound();
-                  setDueDate(dueDate === tomorrowStr ? '' : tomorrowStr);
-                }}
-                className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
-                  dueDate === tomorrowStr
-                    ? "bg-[#C4B5FD] text-black shadow-[2px_2px_0px_#000] ring-2 ring-black"
-                    : "bg-white text-black hover:bg-black/5"
-                }`}
-              >
-                TOMORROW
-              </button>
-
-              {/* Custom Date Input */}
-              <div className="inline-flex items-center border-2 border-black bg-white px-2 py-0.5 shadow-[2px_2px_0px_#000]">
-                <input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => {
-                    playClickSound();
-                    setDueDate(e.target.value);
-                  }}
-                  className="text-xs font-black uppercase outline-none bg-transparent cursor-pointer"
-                />
-                {dueDate && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playClickSound();
-                      setDueDate('');
-                    }}
-                    className="ml-1 text-black hover:text-[#FF6B6B]"
-                    title="Clear date"
-                  >
-                    <X className="h-3 w-3 stroke-[3px]" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Category / Tag Controls */}
-          <div className="flex items-center gap-2 flex-wrap pt-1 border-t-2 border-dashed border-black/20">
-            <span className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1">
-              <TagIcon className="h-3.5 w-3.5 stroke-[2.5px]" />
-              CATEGORY:
-            </span>
-
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {['WORK', 'DEV', 'PERSONAL', 'STUDY', 'HEALTH', 'LIFE'].map((tagName) => {
-                const isSelected = tag === tagName;
-                return (
-                  <button
-                    key={tagName}
-                    type="button"
-                    onClick={() => {
-                      playClickSound();
-                      setTag(isSelected ? '' : tagName);
-                    }}
-                    className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
-                      isSelected
-                        ? "bg-black text-white shadow-[2px_2px_0px_#FFD93D] ring-2 ring-black"
-                        : "bg-white text-black hover:bg-black/5"
-                    }`}
-                  >
-                    #{tagName}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
+        )}
 
       </div>
     </div>
