@@ -17,7 +17,9 @@ import {
   addDoc,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
+  writeBatch,
+  getDocs
 } from 'firebase/firestore';
 
 export { isFirebaseConfigured };
@@ -44,13 +46,16 @@ function getStoredTodos() {
   try {
     const raw = localStorage.getItem(STORAGE_TODOS_KEY);
     if (!raw) {
-      // Seed with initial example tasks with priorities
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      // Seed with initial example tasks with priorities and due dates
       const initial = [
         {
           id: 'demo_1',
           text: 'Welcome to Todo App! 🚀',
           finished: true,
           priority: 1,
+          dueDate: today,
           uid: 'demo-user-id',
           createdAt: Date.now() - 60000
         },
@@ -59,6 +64,7 @@ function getStoredTodos() {
           text: 'Try creating a new task above ✍️',
           finished: false,
           priority: 2,
+          dueDate: today,
           uid: 'demo-user-id',
           createdAt: Date.now() - 30000
         },
@@ -67,6 +73,7 @@ function getStoredTodos() {
           text: 'Toggle checkbox to mark as complete ☑️',
           finished: false,
           priority: 3,
+          dueDate: tomorrow,
           uid: 'demo-user-id',
           createdAt: Date.now()
         }
@@ -75,7 +82,11 @@ function getStoredTodos() {
       return initial;
     }
     const parsed = JSON.parse(raw);
-    return parsed.map(t => ({ ...t, priority: t.priority || 2 }));
+    return parsed.map(t => ({
+      ...t,
+      priority: t.priority || 2,
+      dueDate: t.dueDate || null
+    }));
   } catch {
     return [];
   }
@@ -179,6 +190,7 @@ export function subscribeTodos(userId, callback) {
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
           priority: 2,
+          dueDate: null,
           ...doc.data()
         }));
         callback(data);
@@ -203,13 +215,14 @@ export function subscribeTodos(userId, callback) {
   };
 }
 
-export async function createTodo(text, userId, priority = 2) {
+export async function createTodo(text, userId, priority = 2, dueDate = null) {
   const numericPriority = Number(priority) || 2;
   if (isFirebaseConfigured && db && auth?.currentUser) {
     return await addDoc(collection(db, "todos"), {
       text,
       finished: false,
       priority: numericPriority,
+      dueDate: dueDate || null,
       uid: userId,
       createdAt: Date.now()
     });
@@ -222,6 +235,7 @@ export async function createTodo(text, userId, priority = 2) {
     text,
     finished: false,
     priority: numericPriority,
+    dueDate: dueDate || null,
     uid: userId || 'demo-user-id',
     createdAt: Date.now()
   };
@@ -300,4 +314,52 @@ export async function removeTodo(id) {
   localStorage.setItem(STORAGE_TODOS_KEY, JSON.stringify(todos));
   notifyTodoListeners();
 }
+
+export async function clearCompletedTodos(userId) {
+  if (isFirebaseConfigured && db && auth?.currentUser) {
+    const q = query(
+      collection(db, "todos"),
+      where("uid", "==", userId),
+      where("finished", "==", true)
+    );
+    const snap = await getDocs(q);
+    const batch = writeBatch(db);
+    snap.docs.forEach((docItem) => {
+      batch.delete(docItem.ref);
+    });
+    return await batch.commit();
+  }
+
+  // Demo mode
+  const todos = getStoredTodos().filter((t) => {
+    const isThisUser = !userId || t.uid === userId || t.uid === 'demo-user-id';
+    return !(isThisUser && t.finished);
+  });
+  localStorage.setItem(STORAGE_TODOS_KEY, JSON.stringify(todos));
+  notifyTodoListeners();
+}
+
+export async function toggleAllTodos(userId, targetFinished) {
+  if (isFirebaseConfigured && db && auth?.currentUser) {
+    const q = query(
+      collection(db, "todos"),
+      where("uid", "==", userId)
+    );
+    const snap = await getDocs(q);
+    const batch = writeBatch(db);
+    snap.docs.forEach((docItem) => {
+      batch.update(docItem.ref, { finished: targetFinished });
+    });
+    return await batch.commit();
+  }
+
+  // Demo mode
+  const todos = getStoredTodos().map((t) => {
+    const isThisUser = !userId || t.uid === userId || t.uid === 'demo-user-id';
+    return isThisUser ? { ...t, finished: targetFinished } : t;
+  });
+  localStorage.setItem(STORAGE_TODOS_KEY, JSON.stringify(todos));
+  notifyTodoListeners();
+}
+
 

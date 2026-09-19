@@ -10,12 +10,23 @@ import todoReducer from './reducers/todoReducer';
 import { useEffect, useReducer, useState } from 'react';
 import { onAuthChange, signOutUser, isFirebaseConfigured } from './services/api';
 import Auth from './components/Auth/Auth';
-import { CheckSquare, LogOut, Zap, Star } from 'lucide-react';
+import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX } from 'lucide-react';
+import { isSoundEnabled, setSoundEnabled, playClickSound } from './utils/audio';
 
 function App() {
   const [list, dispatch] = useReducer(todoReducer, []);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+    if (next) {
+      playClickSound();
+    }
+  };
 
   // Listen to authentication state (Firebase or LocalStorage Demo)
   useEffect(() => {
@@ -71,6 +82,27 @@ function App() {
                   <span>DEMO MODE (LOCAL)</span>
                 </div>
               )}
+
+              <button
+                type="button"
+                onClick={toggleSound}
+                className={`btn-neo border-2 border-black px-2.5 py-1 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] flex items-center gap-1.5 transition-all ${
+                  soundOn ? "bg-[#C4B5FD] text-black" : "bg-gray-200 text-gray-500"
+                }`}
+                title={soundOn ? "Mute audio sound FX" : "Unmute audio sound FX"}
+              >
+                {soundOn ? (
+                  <>
+                    <Volume2 className="h-3.5 w-3.5 stroke-[2.5px]" />
+                    <span className="hidden sm:inline">SFX: ON</span>
+                  </>
+                ) : (
+                  <>
+                    <VolumeX className="h-3.5 w-3.5 stroke-[2.5px]" />
+                    <span className="hidden sm:inline">SFX: OFF</span>
+                  </>
+                )}
+              </button>
 
               <div className="bg-white border-2 border-black px-3 py-1 text-xs font-bold shadow-[2px_2px_0px_#000] truncate max-w-[180px] sm:max-w-none">
                 {user.email}
