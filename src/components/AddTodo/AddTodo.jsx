@@ -59,7 +59,7 @@ function AddTodo({ user }) {
               id="new-todo-input"
               className="input-neo w-full text-base font-bold placeholder:text-black/40"
               type="text"
-              placeholder="ENTER A NEW TASK HERE... (PRESS '/' TO FOCUS)"
+              placeholder="ENTER A NEW TASK HERE..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}

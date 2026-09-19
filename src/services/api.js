@@ -178,7 +178,7 @@ export async function signOutUser() {
 // ==========================================
 
 export function subscribeTodos(userId, callback) {
-  if (isFirebaseConfigured && db && auth?.currentUser) {
+  if (isFirebaseConfigured && db) {
     const q = query(
       collection(db, "todos"),
       where("uid", "==", userId)
@@ -217,7 +217,7 @@ export function subscribeTodos(userId, callback) {
 
 export async function createTodo(text, userId, priority = 2, dueDate = null) {
   const numericPriority = Number(priority) || 2;
-  if (isFirebaseConfigured && db && auth?.currentUser) {
+  if (isFirebaseConfigured && db) {
     return await addDoc(collection(db, "todos"), {
       text,
       finished: false,
@@ -316,7 +316,7 @@ export async function removeTodo(id) {
 }
 
 export async function clearCompletedTodos(userId) {
-  if (isFirebaseConfigured && db && auth?.currentUser) {
+  if (isFirebaseConfigured && db) {
     const q = query(
       collection(db, "todos"),
       where("uid", "==", userId),
@@ -340,7 +340,7 @@ export async function clearCompletedTodos(userId) {
 }
 
 export async function toggleAllTodos(userId, targetFinished) {
-  if (isFirebaseConfigured && db && auth?.currentUser) {
+  if (isFirebaseConfigured && db) {
     const q = query(
       collection(db, "todos"),
       where("uid", "==", userId)
