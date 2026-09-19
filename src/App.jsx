@@ -10,7 +10,7 @@ import todoReducer from './reducers/todoReducer';
 import { useEffect, useReducer, useState } from 'react';
 import { onAuthChange, signOutUser, isFirebaseConfigured } from './services/api';
 import Auth from './components/Auth/Auth';
-import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX } from 'lucide-react';
+import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX, ArrowUp } from 'lucide-react';
 import { isSoundEnabled, setSoundEnabled, playClickSound } from './utils/audio';
 
 function App() {
@@ -18,6 +18,20 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    playClickSound();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const toggleSound = () => {
     const next = !soundOn;
@@ -153,6 +167,19 @@ function App() {
           <TodoList user={user} />
 
         </main>
+
+        {/* Smooth Scroll To Top Floating Button */}
+        {showScrollTop && (
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className="btn-neo fixed bottom-6 right-6 z-50 bg-[#FFD93D] text-black border-4 border-black p-3.5 shadow-[5px_5px_0px_#000] hover:-translate-y-1 hover:shadow-[7px_7px_0px_#000] transition-all"
+            title="Scroll to top"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="h-6 w-6 stroke-[3.5px]" />
+          </button>
+        )}
       </TodoDispatchContext.Provider>
     </TodoContext.Provider>
   );
