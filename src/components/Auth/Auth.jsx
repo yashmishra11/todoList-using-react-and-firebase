@@ -151,7 +151,6 @@ function Auth() {
               <div className="pt-2 space-y-3">
                 <button
                   type="submit"
-                  onClick={login}
                   disabled={loading}
                   className="btn-neo bg-[#FFD93D] text-black w-full py-4 text-sm font-black tracking-wider shadow-[4px_4px_0px_#000]"
                 >

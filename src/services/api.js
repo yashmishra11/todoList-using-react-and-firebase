@@ -173,14 +173,20 @@ export function subscribeTodos(userId, callback) {
       where("uid", "==", userId)
     );
 
-    return onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        priority: 2,
-        ...doc.data()
-      }));
-      callback(data);
-    });
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          priority: 2,
+          ...doc.data()
+        }));
+        callback(data);
+      },
+      (error) => {
+        console.error("Firestore todos subscription error:", error);
+      }
+    );
   }
 
   // Demo mode

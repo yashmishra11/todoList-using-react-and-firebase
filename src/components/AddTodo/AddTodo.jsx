@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createTodo } from "../../services/api";
-import { Plus, CornerDownLeft, Sparkles, Flame, Zap, Coffee } from 'lucide-react';
+import { Plus, Sparkles, Flame, Zap, Coffee } from 'lucide-react';
 
 function AddTodo({ user }) {
   const [inputText, setInputText] = useState('');

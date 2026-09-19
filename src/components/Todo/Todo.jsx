@@ -2,15 +2,12 @@ import { useState } from "react";
 import { Check, Edit2, Save, Trash2, Flame, Zap, Coffee } from "lucide-react";
 
 function Todo({ todoData, isFinished, priority = 2, changeFinished, onDelete, onEdit }) {
-  const [finished, setFinished] = useState(isFinished);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(todoData);
   const [editedPriority, setEditedPriority] = useState(priority);
 
   const handleToggle = () => {
-    const next = !finished;
-    setFinished(next);
-    changeFinished(next);
+    changeFinished(!isFinished);
   };
 
   const handleEditCommit = () => {
@@ -19,6 +16,8 @@ function Todo({ todoData, isFinished, priority = 2, changeFinished, onDelete, on
       onEdit(textToSave, editedPriority);
       setIsEditing(false);
     } else {
+      setEditedText(todoData);
+      setEditedPriority(priority);
       setIsEditing(true);
     }
   };
@@ -50,7 +49,7 @@ function Todo({ todoData, isFinished, priority = 2, changeFinished, onDelete, on
 
   return (
     <div className={`card-neo border-4 border-black p-4 sm:p-5 mb-5 transition-all duration-150 ${
-      finished 
+      isFinished 
         ? "bg-[#F5F5F0] shadow-[4px_4px_0px_#000]" 
         : "bg-white hover:-translate-y-1 hover:shadow-[10px_10px_0px_#000] shadow-[6px_6px_0px_#000]"
     }`}>
@@ -61,13 +60,13 @@ function Todo({ todoData, isFinished, priority = 2, changeFinished, onDelete, on
           type="button"
           onClick={handleToggle}
           role="checkbox"
-          aria-checked={finished}
+          aria-checked={isFinished}
           className={`w-8 h-8 shrink-0 border-4 border-black flex items-center justify-center transition-all cursor-pointer shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 ${
-            finished ? "bg-black text-[#FFD93D]" : "bg-white hover:bg-[#FFD93D]"
+            isFinished ? "bg-black text-[#FFD93D]" : "bg-white hover:bg-[#FFD93D]"
           }`}
-          title={finished ? "Mark as incomplete" : "Mark as completed"}
+          title={isFinished ? "Mark as incomplete" : "Mark as completed"}
         >
-          {finished && <Check className="h-5 w-5 stroke-[4px]" />}
+          {isFinished && <Check className="h-5 w-5 stroke-[4px]" />}
         </button>
 
         {/* Priority Badge */}
@@ -127,7 +126,7 @@ function Todo({ todoData, isFinished, priority = 2, changeFinished, onDelete, on
             <span
               onClick={handleToggle}
               className={`block font-bold text-base sm:text-lg tracking-tight select-none cursor-pointer transition-colors ${
-                finished
+                isFinished
                   ? "line-through decoration-[4px] decoration-[#FF6B6B] text-black/40"
                   : "text-black hover:text-black/80"
               }`}
