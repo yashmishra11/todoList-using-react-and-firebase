@@ -196,38 +196,6 @@ function TodoList({ user }) {
   return (
     <div className="space-y-5">
       
-      {/* Search Bar & Instant Filter */}
-      <div className="bg-white border-4 border-black p-3 shadow-[6px_6px_0px_#000] flex items-center gap-3">
-        <div className="relative flex-1 flex items-center">
-          <Search className="h-5 w-5 stroke-[3px] text-black absolute left-3 shrink-0 pointer-events-none" />
-          <input
-            id="task-search-input"
-            type="text"
-            placeholder="SEARCH TASKS BY TITLE OR DEADLINE... (PRESS '/' TO JUMP HERE)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-9 py-2 font-bold text-sm bg-transparent outline-none uppercase placeholder:text-black/40"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => {
-                playClickSound();
-                setSearchQuery('');
-              }}
-              className="absolute right-2.5 p-1 bg-[#FF6B6B] text-white border-2 border-black shadow-[2px_2px_0px_#000]"
-              title="Clear search"
-            >
-              <X className="h-3 w-3 stroke-[3px]" />
-            </button>
-          )}
-        </div>
-
-        <span className="hidden sm:inline-block bg-[#FFD93D] border-2 border-black px-2 py-1 text-[11px] font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] shrink-0">
-          PRESS [/] TO SEARCH
-        </span>
-      </div>
-
       {/* Progress Bar Component */}
       {totalCount > 0 && (
         <div className="bg-white border-4 border-black p-4 shadow-[6px_6px_0px_#000] space-y-2">
@@ -416,6 +384,38 @@ function TodoList({ user }) {
 
         </div>
       )}
+
+      {/* Search Bar & Instant Filter - Positioned just above the list */}
+      <div className="bg-white border-4 border-black p-3 shadow-[6px_6px_0px_#000] flex items-center gap-3">
+        <div className="relative flex-1 flex items-center">
+          <Search className="h-5 w-5 stroke-[3px] text-black absolute left-3 shrink-0 pointer-events-none" />
+          <input
+            id="task-search-input"
+            type="text"
+            placeholder="SEARCH TASKS BY TITLE OR DEADLINE... (PRESS '/' TO JUMP HERE)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-9 py-2 font-bold text-sm bg-transparent outline-none uppercase placeholder:text-black/40"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setSearchQuery('');
+              }}
+              className="absolute right-2.5 p-1 bg-[#FF6B6B] text-white border-2 border-black shadow-[2px_2px_0px_#000]"
+              title="Clear search"
+            >
+              <X className="h-3 w-3 stroke-[3px]" />
+            </button>
+          )}
+        </div>
+
+        <span className="hidden sm:inline-block bg-[#FFD93D] border-2 border-black px-2 py-1 text-[11px] font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] shrink-0">
+          PRESS [/] TO SEARCH
+        </span>
+      </div>
 
       {/* Todo List Items */}
       {sortedTodos.length === 0 ? (
