@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { createTodo } from "../../services/api";
-import { Plus, Sparkles, Flame, Zap, Coffee, Calendar, X } from 'lucide-react';
+import { Plus, Sparkles, Flame, Zap, Coffee, Calendar, X, Tag as TagIcon } from 'lucide-react';
 import { playClickSound } from '../../utils/audio';
 
 function AddTodo({ user }) {
   const [inputText, setInputText] = useState('');
   const [priority, setPriority] = useState(2); // 1 = Critical, 2 = Medium, 3 = Low
   const [dueDate, setDueDate] = useState('');
+  const [tag, setTag] = useState('');
   const [loading, setLoading] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -18,9 +19,10 @@ function AddTodo({ user }) {
 
     try {
       setLoading(true);
-      await createTodo(trimmed, user?.uid, priority, dueDate || null);
+      await createTodo(trimmed, user?.uid, priority, dueDate || null, tag || null);
       setInputText('');
       setDueDate('');
+      setTag('');
       playClickSound();
     } catch (err) {
       console.error("Failed to add todo:", err);
@@ -181,6 +183,34 @@ function AddTodo({ user }) {
                   </button>
                 )}
               </div>
+          {/* Category / Tag Controls */}
+          <div className="flex items-center gap-2 flex-wrap pt-1 border-t-2 border-dashed border-black/20">
+            <span className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1">
+              <TagIcon className="h-3.5 w-3.5 stroke-[2.5px]" />
+              CATEGORY:
+            </span>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {['WORK', 'DEV', 'PERSONAL', 'STUDY', 'HEALTH', 'LIFE'].map((tagName) => {
+                const isSelected = tag === tagName;
+                return (
+                  <button
+                    key={tagName}
+                    type="button"
+                    onClick={() => {
+                      playClickSound();
+                      setTag(isSelected ? '' : tagName);
+                    }}
+                    className={`border-2 border-black px-2.5 py-0.5 text-xs font-black uppercase tracking-wider transition-all ${
+                      isSelected
+                        ? "bg-black text-white shadow-[2px_2px_0px_#FFD93D] ring-2 ring-black"
+                        : "bg-white text-black hover:bg-black/5"
+                    }`}
+                  >
+                    #{tagName}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
