@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 @theme {
   --color-neo-bg: #FFFDF5;
@@ -55,7 +56,7 @@ body {
     linear-gradient(to right, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #root {

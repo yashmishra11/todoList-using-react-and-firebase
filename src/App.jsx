@@ -7,11 +7,12 @@ import TodoContext from './components/context/TodoContext';
 import TodoDispatchContext from './components/context/TodoDispatchContext';
 import todoReducer from './reducers/todoReducer';
 
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState, useRef } from 'react';
 import { onAuthChange, signOutUser, isFirebaseConfigured } from './services/api';
 import Auth from './components/Auth/Auth';
 import { CheckSquare, LogOut, Zap, Star, Volume2, VolumeX, ArrowUp } from 'lucide-react';
 import { isSoundEnabled, setSoundEnabled, playClickSound } from './utils/audio';
+import Lenis from 'lenis';
 
 function App() {
   const [list, dispatch] = useReducer(todoReducer, []);
@@ -19,18 +20,43 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const lenisRef = useRef(null);
 
+  // Buttery smooth momentum scrolling via Lenis
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
+    const lenis = new Lenis({
+      duration: 1.0,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 1.5,
+    });
+    lenisRef.current = lenis;
+
+    lenis.on('scroll', ({ scroll }) => {
+      setShowScrollTop(scroll > 200);
+    });
+
+    let rafId;
+    function raf(time) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      lenisRef.current = null;
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToTop = () => {
     playClickSound();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { duration: 1.1 });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const toggleSound = () => {
