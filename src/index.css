@@ -27,11 +27,22 @@
   --white: #FFFFFF;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 *, ::before, ::after {
   box-sizing: border-box;
 }
 
 body {
+  scroll-behavior: smooth;
   min-height: 100vh;
   width: 100%;
   margin: 0;
