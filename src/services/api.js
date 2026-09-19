@@ -56,6 +56,7 @@ function getStoredTodos() {
           finished: true,
           priority: 1,
           dueDate: today,
+          tag: 'LIFE',
           uid: 'demo-user-id',
           createdAt: Date.now() - 60000
         },
@@ -65,6 +66,7 @@ function getStoredTodos() {
           finished: false,
           priority: 2,
           dueDate: today,
+          tag: 'DEV',
           uid: 'demo-user-id',
           createdAt: Date.now() - 30000
         },
@@ -74,6 +76,7 @@ function getStoredTodos() {
           finished: false,
           priority: 3,
           dueDate: tomorrow,
+          tag: 'WORK',
           uid: 'demo-user-id',
           createdAt: Date.now()
         }
@@ -85,7 +88,8 @@ function getStoredTodos() {
     return parsed.map(t => ({
       ...t,
       priority: t.priority || 2,
-      dueDate: t.dueDate || null
+      dueDate: t.dueDate || null,
+      tag: t.tag || null
     }));
   } catch {
     return [];
@@ -191,6 +195,7 @@ export function subscribeTodos(userId, callback) {
           id: doc.id,
           priority: 2,
           dueDate: null,
+          tag: null,
           ...doc.data()
         }));
         callback(data);
@@ -215,7 +220,7 @@ export function subscribeTodos(userId, callback) {
   };
 }
 
-export async function createTodo(text, userId, priority = 2, dueDate = null) {
+export async function createTodo(text, userId, priority = 2, dueDate = null, tag = null) {
   const numericPriority = Number(priority) || 2;
   if (isFirebaseConfigured && db) {
     return await addDoc(collection(db, "todos"), {
@@ -223,6 +228,7 @@ export async function createTodo(text, userId, priority = 2, dueDate = null) {
       finished: false,
       priority: numericPriority,
       dueDate: dueDate || null,
+      tag: tag || null,
       uid: userId,
       createdAt: Date.now()
     });
@@ -236,6 +242,7 @@ export async function createTodo(text, userId, priority = 2, dueDate = null) {
     finished: false,
     priority: numericPriority,
     dueDate: dueDate || null,
+    tag: tag || null,
     uid: userId || 'demo-user-id',
     createdAt: Date.now()
   };

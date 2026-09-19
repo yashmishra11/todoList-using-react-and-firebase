@@ -126,3 +126,45 @@ export function playDeleteSound() {
     console.debug('Audio error:', err);
   }
 }
+
+/**
+ * Celebratory retro digital fanfare alarm when timer finishes
+ */
+export function playTimerAlarmSound() {
+  if (!isSoundEnabled()) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const chords = [
+      [587.33, 739.99, 880.00],
+      [659.25, 830.61, 987.77],
+      [783.99, 987.77, 1174.66],
+      [1046.50, 1318.51, 1567.98],
+    ];
+
+    chords.forEach((chord, pulseIdx) => {
+      chord.forEach((freq) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        const startTime = ctx.currentTime + pulseIdx * 0.18;
+        const duration = 0.16;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.2, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      });
+    });
+  } catch (err) {
+    console.debug('Audio error:', err);
+  }
+}
